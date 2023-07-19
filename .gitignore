@@ -1,0 +1,59 @@
+# .NET and Visual Studio files
+*.suo
+*.user
+*.vs/
+*.vssscc
+*.vspscc
+*.sln
+*.bak
+*.cache
+*.csproj.user
+*.dotCover
+*.resharper
+_ReSharper.*
+*.dbmdl
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# MSTest test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# NuGet
+packages/
+*.nupkg
+nuget.exe
+*.psmdcp
+*.pdb
+
+# Visual Studio Code files
+.vscode/
+
+# Resharper files
+_ReSharper.*
+*.[Rr]e[Ss]harper
+
+# Folders to ignore
+[Dd]ebug*/
+[Rr]elease*/
+[Bb]ackup*/
+[Tt]emp*/
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og*/
+
+# Mac and Unity specific files
+.DS_Store
+Thumbs.db
+
+.idea/
