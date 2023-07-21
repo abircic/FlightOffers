@@ -17,22 +17,21 @@ public class TokenService : ITokenService
 
     public async Task<string> FetchAccessToken()
     {
-        var token = await _clientService.FetchAccessToken();
-        if (String.IsNullOrEmpty(token)) return "";
-        SetToken(token);
+        _memoryCache.TryGetValue(TokenKey, out string token);
+        if (String.IsNullOrEmpty(token))
+        {
+            token = await _clientService.FetchAccessToken();
+            if (String.IsNullOrEmpty(token)) return "";
+            SetAccessToken(token);
+        }
         return token;
-    }
-    public string GetToken()
-    {
-        return _memoryCache.TryGetValue(TokenKey, out string key) ? key : null;
-        
-    }
 
+    }
     #region Private
 
-    private void SetToken(string token)
+    private void SetAccessToken(string token)
     {
-        _memoryCache.Set(TokenKey, token, TimeSpan.FromMinutes(30));
+        _memoryCache.Set(TokenKey, token, TimeSpan.FromMinutes(20));
     }
 
     #endregion

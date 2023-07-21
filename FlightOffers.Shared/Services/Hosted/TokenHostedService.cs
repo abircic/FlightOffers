@@ -29,7 +29,6 @@ public class TokenHostedService : IHostedService
         try
         {
             var token = await _tokenService.FetchAccessToken();
-            Console.WriteLine(DateTime.Now+token);
             if (String.IsNullOrEmpty(token))
                 throw new Exception();
             await SetTimer(TimeSpan.FromMinutes(20));
@@ -46,7 +45,7 @@ public class TokenHostedService : IHostedService
     {
         if(_timer != null)
             await _timer.DisposeAsync();
-        _timer = new Timer(async o => await FetchToken(o), null, timeSpan, TimeSpan.FromMinutes(30));
+        _timer = new Timer(async o => await FetchToken(o), null, timeSpan, TimeSpan.FromMinutes(20));
     }
     #endregion
 

@@ -1,22 +1,28 @@
+using FlightOffers.Shared.Models.Domain;
+
 namespace FlightOffers.Shared.Models.Response;
 
 public class FetchFlightOfferResponse
 {
-    public List<FlightInfo> Data { get; set; }
+    public List<FlightInfoDto> Data { get; set; }
     public bool IsSuccess { get; set; }
     public string ErrorMessage { get; set; }
 }
 
-public class FlightInfo
+public class FlightInfoDto
 {
-    public string Id { get; set; }
+    public Guid Id { get; set; }
+    public string ClientId { get; set; }
     public string OriginLocationCode { get; set; }
     public string DestinationLocationCode { get; set; }
-    public DateTime DepartureDate { get; set; }
-    public DateTime? ReturnDate { get; set; }
+    public string DepartureDate { get; set; }
+    public string? ReturnDate { get; set; }
     public int Adults { get; set; }
+    public List<Transfer> OutBoundTransfers { get; set; }
+    public List<Transfer>? InBoundTransfers { get; set; }
     public decimal TotalPrice { get; set; }
     public string CurrencyCode { get; set; }
+    
     public int NumberOfOutBoundTransfers { get; set; }   
     public int? NumberOfInBoundTransfers { get; set; }
 }

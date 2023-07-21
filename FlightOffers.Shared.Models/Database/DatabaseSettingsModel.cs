@@ -1,4 +1,4 @@
-namespace FlightOffers.Shared.Models.Constants;
+namespace FlightOffers.Shared.Models.Database;
 
 public class DatabaseSettingsModel
 {

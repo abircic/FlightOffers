@@ -1,4 +1,8 @@
 using System.Net;
+using FlightOffers.Shared.Models.Exceptions;
+using FlightOffers.Shared.Models.Request;
+using FlightOffers.Shared.Models.Response;
+using FlightOffers.Shared.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlightOffers.Api.Controllers;
@@ -7,13 +11,20 @@ namespace FlightOffers.Api.Controllers;
 [Route("/api/public/[controller]/[action]")]
 public class OfferController : Controller
 {
+    private readonly IFlightOfferService _flightOfferService;
+
+    public OfferController(IFlightOfferService flightOfferService)
+    {
+        _flightOfferService = flightOfferService;
+    }
     [HttpGet]
-    [ProducesResponseType((int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(FetchFlightOfferResponse),(int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-    public async Task<IActionResult> Fetch()
+    public async Task<IActionResult> Fetch([FromQuery]FetchFlightsOfferRequest request)
     {
         if (!ModelState.IsValid)
-            return BadRequest($"Invalid data supplied. Required: {string.Join(',', ModelState.Keys)}");
-        return Ok();
+            throw new BadRequestException($"Invalid data supplied. Required: {string.Join(',', ModelState.Keys)}");
+        
+        return Ok(await _flightOfferService.GetFlightsOffer(request));
     }
 }

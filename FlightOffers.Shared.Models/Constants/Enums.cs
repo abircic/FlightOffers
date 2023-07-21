@@ -5,9 +5,4 @@ public enum CurrencyCodes
     USD,
     EUR,
     HRK
-}
-
-public enum ErrorCodes
-{
-    InvalidCurrencyCode
-}
+}   

@@ -13,5 +13,7 @@ public class Error
 
     [JsonPropertyName("detail")]
     public string Detail { get; set; }
+    [JsonPropertyName("status")]
+    public int Status { get; set; }
 }
     

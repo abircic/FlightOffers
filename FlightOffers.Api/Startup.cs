@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using FlightOffers.Shared.Models.Constants;
+using FlightOffers.Shared.Models.Middlewares;
 using FlightOffers.Shared.Services.Hosted;
 using FlightOffers.Shared.Services.Implementations;
 using FlightOffers.Shared.Services.Interfaces;
@@ -27,13 +28,14 @@ public class Startup
         services.Configure<AppSettingsModel>(Configuration.GetSection("AppSettings"));
         services.AddSingleton<ITokenService, TokenService>();
         services.AddSingleton<IClientService, ClientService>();
+        services.AddScoped<IFlightOfferService, FlightOffersService>();
         services.AddHostedService<TokenHostedService>();
     }
 
     public void Configure(IApplicationBuilder app)
     {
+        app.UseMiddleware<ErrorHandlingMiddleware>();
         app.UseRouting();
-        
         app.UseCors(x => x
             .SetIsOriginAllowed(origin => true)
             .AllowCredentials()
