@@ -15,18 +15,25 @@ public class TokenService : ITokenService
         _clientService = clientService;
     }
 
-    public async Task<string> FetchAccessToken()
+    public async Task<string> FetchAccessToken(bool forceUpdate)
     {
-        _memoryCache.TryGetValue(TokenKey, out string token);
-        if (String.IsNullOrEmpty(token))
+        string token;
+    
+        if (!forceUpdate)
         {
-            token = await _clientService.FetchAccessToken();
-            if (String.IsNullOrEmpty(token)) return "";
-            SetAccessToken(token);
+            _memoryCache.TryGetValue(TokenKey, out token);
+            if (!string.IsNullOrEmpty(token))
+                return token;
         }
-        return token;
 
+        token = await _clientService.FetchAccessToken();
+        if (string.IsNullOrEmpty(token))
+            return "";
+
+        SetAccessToken(token);
+        return token;
     }
+
     #region Private
 
     private void SetAccessToken(string token)

@@ -23,7 +23,7 @@ public class FlightOffersService : IFlightOfferService
         {
                 ValidateRequest(request);
                 
-                var token = await _tokenService.FetchAccessToken();
+                var token = await _tokenService.FetchAccessToken(false);
                 if (String.IsNullOrEmpty(token))
                         throw new ServiceUnavailableException(ErrorMessages.ServiceUnavailable);
                 
@@ -33,10 +33,16 @@ public class FlightOffersService : IFlightOfferService
                 
                 var flightsOffer =  await _clientService.FetchFlightsOffer(request, token);
 
+                if (!flightsOffer.IsSuccess && flightsOffer.ErrorMessage == ErrorMessages.Forbidden)
+                {
+                        var newToken = await _tokenService.FetchAccessToken(true); 
+                        flightsOffer =  await _clientService.FetchFlightsOffer(request, newToken);
+                }
+                
                 if (!flightsOffer.IsSuccess)
                         throw new BadRequestException(flightsOffer.ErrorMessage);
 
-                if (flightsOffer.Data.Count <= 0)
+                if (flightsOffer.Data.Count == 0)
                         return new FetchFlightOfferResponse() { IsSuccess = true, Data = new List<FlightInfoDto>() };
                 
                 await _offerRepositoryService.SaveOffers(MapResponseToOfferModel(flightsOffer.Data));

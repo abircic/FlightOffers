@@ -28,7 +28,7 @@ public class TokenHostedService : IHostedService
     {
         try
         {
-            var token = await _tokenService.FetchAccessToken();
+            var token = await _tokenService.FetchAccessToken(true);
             if (String.IsNullOrEmpty(token))
                 throw new Exception();
             await SetTimer(TimeSpan.FromMinutes(20));

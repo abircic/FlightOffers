@@ -14,7 +14,7 @@ namespace FlightOffers.Shared.Services.Implementations;
 
 public class ClientService : IClientService
 {  
-    static readonly HttpClient httpClient = new();
+    static HttpClient _httpClient = new();
     private readonly AppSettingsModel _appSettingsModel;
 
     public ClientService(IOptionsMonitor<AppSettingsModel>appSettingsModel)
@@ -23,6 +23,7 @@ public class ClientService : IClientService
     }
     public async Task<string> FetchAccessToken()
     {
+        var httpClient = new HttpClient();
         var requestUri = $"{_appSettingsModel.FlightOffersBaseUrl}{Endpoints.GetToken}";
         var formData = new Dictionary<string, string>
         {
@@ -32,32 +33,22 @@ public class ClientService : IClientService
         };
 
         var content = new FormUrlEncodedContent(formData);
+        
+        HttpResponseMessage response = await httpClient.PostAsync(requestUri, content);
 
-        
-            HttpResponseMessage response = await httpClient.PostAsync(requestUri, content);
-        
-            if (response.IsSuccessStatusCode)
-            {
-                string responseBody = await response.Content.ReadAsStringAsync();
-                var body = JsonSerializer.Deserialize<FetchTokenResponseDto>(responseBody);
-                if (body != null)
-                {
-                    return body.AccessToken;
-                }
-            }
-            else
-            {
-                string responseBody = await response.Content.ReadAsStringAsync();
-                Console.WriteLine(responseBody);
-            }
+        if (!response.IsSuccessStatusCode)
             return "";
+        
+        string responseBody = await response.Content.ReadAsStringAsync();
+        var body = JsonSerializer.Deserialize<FetchTokenResponseDto>(responseBody);
+        return body != null ? body.AccessToken : "";
     }
     
     public async Task<FetchFlightOfferResponse> FetchFlightsOffer(FetchFlightsOfferRequest request, string token)
     {
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     
-        HttpResponseMessage response = await httpClient.GetAsync(CreateRequestUri(request));
+        HttpResponseMessage response = await _httpClient.GetAsync(CreateRequestUri(request));
         var responseBody = await response.Content.ReadAsStringAsync();
         if (response.IsSuccessStatusCode)
         {
@@ -67,6 +58,14 @@ public class ClientService : IClientService
         else
         {
             var body = JsonSerializer.Deserialize<ErrorResponseDto>(responseBody);
+            if (body != null && body.Errors.Any(x => x.Status == 401))
+            {
+                return new FetchFlightOfferResponse()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = ErrorMessages.Forbidden
+                };
+            }
             return new FetchFlightOfferResponse()
             {
                 IsSuccess = false,
