@@ -8,19 +8,22 @@ class Program
 {
     static void Main(string[] args)
     {
-        var serviceProvider = CreateServices();
+        var connectionString = args.FirstOrDefault(x => x.Contains("connectionString"));
+        if (connectionString == null)
+            return;
+        var extractedConnectionString = connectionString.Substring(connectionString.IndexOf("=") + 1);
+        var serviceProvider = CreateServices(extractedConnectionString);
         using var scope = serviceProvider.CreateScope();
         UpdateDatabase(scope.ServiceProvider);
     }
 
-    private static IServiceProvider CreateServices()
+    private static IServiceProvider CreateServices(string connectionString)
     {
         return new ServiceCollection()
             .AddFluentMigratorCore()
             .ConfigureRunner(rb => rb
                 .AddPostgres()
-                .WithGlobalConnectionString(
-                    "Server=localhost;Port=5432;Username=postgres;Password=postgres;Database=test")
+                .WithGlobalConnectionString(connectionString)
                 .ScanIn(typeof(Migration_2023_07_20_Create_Offer_Table).Assembly).For.Migrations())
             .AddLogging(lb => lb.AddFluentMigratorConsole())
             .AddScoped<IVersionTableMetaData, VersionTableInfo>()

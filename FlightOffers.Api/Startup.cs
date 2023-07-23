@@ -1,9 +1,11 @@
 using System.Text.Json.Serialization;
 using FlightOffers.Shared.Models.Constants;
+using FlightOffers.Shared.Models.Database;
 using FlightOffers.Shared.Models.Middlewares;
 using FlightOffers.Shared.Services.Hosted;
 using FlightOffers.Shared.Services.Implementations;
 using FlightOffers.Shared.Services.Interfaces;
+using FlightOffers.Shared.Services.Repositories;
 
 namespace FlightOffers.Api;
 
@@ -21,6 +23,8 @@ public class Startup
             options.JsonSerializerOptions.DefaultIgnoreCondition 
                 = JsonIgnoreCondition.WhenWritingNull;;
         });
+        
+        services.Configure<DatabaseSettingsModel>(Configuration.GetSection("DatabaseSettings"));
         services.AddCors();
         services.AddMemoryCache();
         services.AddControllers();
@@ -29,6 +33,7 @@ public class Startup
         services.AddSingleton<ITokenService, TokenService>();
         services.AddSingleton<IClientService, ClientService>();
         services.AddScoped<IFlightOfferService, FlightOffersService>();
+        services.AddScoped<IOfferRepositoryService, OfferRepositoryService>();
         services.AddHostedService<TokenHostedService>();
     }
 

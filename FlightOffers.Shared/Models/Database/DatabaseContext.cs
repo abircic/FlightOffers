@@ -22,7 +22,7 @@ public class DatabaseContext: DbContext
             .HasConversion(
                 v => JsonSerializer.Serialize(v, new JsonSerializerOptions{PropertyNameCaseInsensitive = true}),
                 v => JsonSerializer.Deserialize<ExtraInfo>(v, new JsonSerializerOptions{PropertyNameCaseInsensitive = true}));
-        builder.HasDefaultSchema("flight_offer");
+        builder.HasDefaultSchema("flight_offers");
         base.OnModelCreating(builder);
     }
     public static DatabaseContext GenerateContext(string connString)
