@@ -84,7 +84,7 @@ public class FlightOffersService : IFlightOfferService
                                 TotalPrice = x.ExtraInfo.TotalPrice,
                                 NumberOfOutBoundTransfers = x.ExtraInfo.OutBoundTransfers.Count,
                                 NumberOfInBoundTransfers  = x.ExtraInfo.InBoundTransfers != null ? x.ExtraInfo.InBoundTransfers.Count : null
-                        }).ToList()
+                        }).OrderBy(x=>x.ClientId).ToList()
                 };
         }
         

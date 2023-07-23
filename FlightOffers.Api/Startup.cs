@@ -6,6 +6,7 @@ using FlightOffers.Shared.Services.Hosted;
 using FlightOffers.Shared.Services.Implementations;
 using FlightOffers.Shared.Services.Interfaces;
 using FlightOffers.Shared.Services.Repositories;
+using Microsoft.OpenApi.Models;
 
 namespace FlightOffers.Api;
 
@@ -24,6 +25,15 @@ public class Startup
                 = JsonIgnoreCondition.WhenWritingNull;;
         });
         
+        services.AddSwaggerGen(options => 
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Version = "v1",
+                Title = "FlightOffers.Api"
+            });
+        });
+
         services.Configure<DatabaseSettingsModel>(Configuration.GetSection("DatabaseSettings"));
         services.AddCors();
         services.AddMemoryCache();
@@ -41,6 +51,14 @@ public class Startup
     {
         app.UseMiddleware<ErrorHandlingMiddleware>();
         app.UseRouting();
+        
+        app.UseSwagger();
+        app.UseSwaggerUI(options =>
+        {
+            options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+            options.RoutePrefix = string.Empty;
+        });
+        
         app.UseCors(x => x
             .SetIsOriginAllowed(origin => true)
             .AllowCredentials()
