@@ -4,6 +4,7 @@ using FlightOffers.Shared.Models.Exceptions;
 using FlightOffers.Shared.Models.Request;
 using FlightOffers.Shared.Models.Response;
 using FlightOffers.Shared.Services.Interfaces;
+using Microsoft.Extensions.Options;
 
 namespace FlightOffers.Shared.Services.Implementations;
 
@@ -27,27 +28,21 @@ public class FlightOffersService : IFlightOfferService
                 if (String.IsNullOrEmpty(token))
                         throw new ServiceUnavailableException(ErrorMessages.ServiceUnavailable);
                 
-                var offerModels = await GetOfferFromDatabase(request);
-                if (offerModels.Count > 0)
-                        return MapOfferModelToResponse(offerModels);
+                var filter = await GetOfferFilter(request);
                 
-                var flightsOffer =  await _clientService.FetchFlightsOffer(request, token);
-
-                if (!flightsOffer.IsSuccess && flightsOffer.ErrorMessage == ErrorMessages.Forbidden)
+                if (filter != null)
                 {
-                        var newToken = await _tokenService.FetchAccessToken(true); 
-                        flightsOffer =  await _clientService.FetchFlightsOffer(request, newToken);
+                        var offerModels = await GetOfferFromDatabase(filter.Id);
+                        return MapOfferModelToResponse(offerModels, request);
                 }
-                
-                if (!flightsOffer.IsSuccess)
-                        throw new BadRequestException(flightsOffer.ErrorMessage);
 
-                if (flightsOffer.Data.Count == 0)
-                        return new FetchFlightOfferResponse() { IsSuccess = true, Data = new List<FlightInfoDto>() };
+                var flightsOffers = await FetchFlightOffersFromClient(request, token);
                 
-                await _offerRepositoryService.SaveOffers(MapResponseToOfferModel(flightsOffer.Data));
+                var offers = MapResponseFromClientToOfferModel(flightsOffers.Offers, request);
                 
-                return new FetchFlightOfferResponse { IsSuccess = true, Data = flightsOffer.Data };
+                await _offerRepositoryService.SaveOffers(offers);
+                
+                return MapOfferModelToResponse(offers.Offers.ToList(), request);
         }
 
         #region Private
@@ -63,56 +58,81 @@ public class FlightOffersService : IFlightOfferService
                         throw new BadRequestException(ErrorMessages.InvalidDateChronology);
         }
 
-        private async Task<List<OfferModel>> GetOfferFromDatabase(FetchFlightsOfferRequest request)
+        private async Task<OfferFilterModel> GetOfferFilter(FetchFlightsOfferRequest request)
         {
-                return await _offerRepositoryService.GetOffers(request.OriginLocationCode,
+                return await _offerRepositoryService.GetOfferFilter(request.OriginLocationCode,
                         request.DestinationLocationCode, request.DepartureDate.ToString("yyyy-MM-dd"),
-                        request.ReturnDate.HasValue ? request.ReturnDate.Value.ToString("yyyy-MM-dd") : null, request.Adults, request.CurrencyCode);
+                        request.ReturnDate.HasValue ? request.ReturnDate.Value.ToString("yyyy-MM-dd") : null, 
+                        request.Adults, request.CurrencyCode);
         }
         
-        private FetchFlightOfferResponse MapOfferModelToResponse(List<OfferModel> offerModels)
+        private async Task<List<OfferModel>> GetOfferFromDatabase(Guid id )
+        {
+                return await _offerRepositoryService.GetOffers(id);
+        }
+
+        private async Task<FetchFlightOfferResponse> FetchFlightOffersFromClient(FetchFlightsOfferRequest request, string token)
+        {
+                var flightsOffers =  await _clientService.FetchFlightsOffer(request, token);
+
+                if (!flightsOffers.IsSuccess && flightsOffers.ErrorMessage == ErrorMessages.Forbidden)
+                {
+                        var newToken = await _tokenService.FetchAccessToken(true); 
+                        flightsOffers =  await _clientService.FetchFlightsOffer(request, newToken);
+                }
+                if (!flightsOffers.IsSuccess)
+                        throw new BadRequestException(flightsOffers.ErrorMessage);
+                return flightsOffers;
+        }
+
+        private FetchFlightOfferResponse MapOfferModelToResponse(List<OfferModel> offerModels, FetchFlightsOfferRequest request)
         {
                 return new FetchFlightOfferResponse()
                 {
                         IsSuccess = true, 
-                        Data = offerModels.Select(x=>new FlightInfoDto()
+                        OriginLocationCode = request.OriginLocationCode,
+                        DestinationLocationCode = request.DestinationLocationCode,
+                        DepartureDate = request.DepartureDate.ToString("yyyy-MM-dd"),
+                        ReturnDate = request.ReturnDate.HasValue ? request.ReturnDate.Value.ToString("yyyy-MM-dd") : null,
+                        Adults = request.Adults,
+                        CurrencyCode = request.CurrencyCode,
+                        Offers = offerModels.Select(x=>new FlightInfoDto()
                         {
                                 Id = x.Id,
-                                ClientId = x.ClientId,
-                                OriginLocationCode = x.OriginLocationCode,
-                                DestinationLocationCode = x.DestinationLocationCode,
-                                DepartureDate = x.DepartureDate,
-                                ReturnDate = x.ReturnDate,
-                                Adults = x.Adults,
-                                CurrencyCode = x.CurrencyCode,
                                 InBoundTransfers = x.ExtraInfo.InBoundTransfers,
                                 OutBoundTransfers = x.ExtraInfo.OutBoundTransfers,
                                 TotalPrice = x.ExtraInfo.TotalPrice,
                                 NumberOfOutBoundTransfers = x.ExtraInfo.OutBoundTransfers.Count,
                                 NumberOfInBoundTransfers  = x.ExtraInfo.InBoundTransfers != null ? x.ExtraInfo.InBoundTransfers.Count : null
-                        }).OrderBy(x=>x.ClientId).ToList()
+                        }).OrderBy(x=>x.Id).ToList()
                 };
         }
         
-        private List<OfferModel> MapResponseToOfferModel(List<FlightInfoDto> flightsOffers)
+        private OfferFilterModel MapResponseFromClientToOfferModel(List<FlightInfoDto> flightsOffers, FetchFlightsOfferRequest request)
         {
-                return flightsOffers.Select(x => new OfferModel()
+                var filterId = Guid.NewGuid();
+                return  new OfferFilterModel()
                 {
-                        Id = x.Id,
-                        ClientId = x.ClientId,
-                        OriginLocationCode = x.OriginLocationCode,
-                        DestinationLocationCode = x.DestinationLocationCode,
-                        Adults = x.Adults,
-                        CurrencyCode = x.CurrencyCode,
-                        DepartureDate = x.DepartureDate,
-                        ReturnDate = x.ReturnDate,
-                        ExtraInfo = new ExtraInfo()
+                        Id = filterId,
+                        Adults = request.Adults,
+                        CurrencyCode = request.CurrencyCode,
+                        DepartureDate = request.DepartureDate.ToString("yyyy-MM-dd"),
+                        ReturnDate = request.ReturnDate.HasValue ? request.ReturnDate.Value.ToString("yyyy-MM-dd") : null,
+                        DestinationLocationCode = request.DestinationLocationCode,
+                        OriginLocationCode = request.OriginLocationCode,
+                        Offers = flightsOffers.Select(x => new OfferModel()
                         {
-                                OutBoundTransfers = x.OutBoundTransfers,
-                                InBoundTransfers = x.InBoundTransfers,
-                                TotalPrice = x.TotalPrice
-                        }
-                }).ToList();
+                                Id = Guid.NewGuid(),
+                                OfferFilterId = filterId,
+                                ExtraInfo = new ExtraInfo
+                                {
+                                        ClientId = x.ClientId,
+                                        OutBoundTransfers = x.OutBoundTransfers,
+                                        InBoundTransfers = x.InBoundTransfers,
+                                        TotalPrice = x.TotalPrice
+                                }
+                        }).ToList()
+                };
         }
         
         #endregion

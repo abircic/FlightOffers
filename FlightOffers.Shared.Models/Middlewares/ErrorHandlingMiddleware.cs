@@ -39,10 +39,10 @@ public class ErrorHandlingMiddleware
     private async Task HandleErrorResponse(HttpContext context, HttpStatusCode statusCode, string errorMessage)
     {
         context.Response.StatusCode = (int)statusCode;
-        var errorResponse = new FetchFlightOfferResponse
+        var errorResponse = new ErrorResponse()
         {
-            IsSuccess = false,
-            ErrorMessage = errorMessage
+            Status = (int)statusCode,
+            Message = errorMessage
         };
 
         var jsonSerializerOptions = new JsonSerializerOptions

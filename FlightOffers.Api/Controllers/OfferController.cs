@@ -19,7 +19,9 @@ public class OfferController : Controller
     }
     [HttpGet]
     [ProducesResponseType(typeof(FetchFlightOfferResponse),(int)HttpStatusCode.OK)]
-    [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.InternalServerError)]
+    [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.ServiceUnavailable)]
     public async Task<IActionResult> Fetch([FromQuery]FetchFlightsOfferRequest request)
     {
         if (!ModelState.IsValid)

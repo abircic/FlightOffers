@@ -11,12 +11,27 @@ public class DatabaseContext: DbContext
     {
     }
     public DbSet<OfferModel> Offer { get; set; }
+    public DbSet<OfferFilterModel> OfferFilter { get; set; }
     
     protected override void OnModelCreating(ModelBuilder builder)
     {
 
         builder.Entity<OfferModel>()
             .HasKey(x=>x.Id);
+        builder.Entity<OfferFilterModel>()
+            .HasKey(x => x.Id);
+        
+        builder.Entity<OfferModel>()
+            .HasOne(x => x.Filter)
+            .WithMany(x => x.Offers)
+            .HasForeignKey(x => x.OfferFilterId);
+
+        builder.Entity<OfferFilterModel>()
+            .HasMany(x => x.Offers) 
+            .WithOne(x => x.Filter) 
+            .HasForeignKey(x => x.OfferFilterId); 
+
+        
         builder.Entity<OfferModel>()
             .Property(b => b.ExtraInfo)
             .HasConversion(

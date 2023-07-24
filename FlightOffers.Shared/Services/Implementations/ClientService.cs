@@ -98,15 +98,15 @@ public class ClientService : IClientService
     {
         return new FetchFlightOfferResponse
         {
-            Data = body.Data.Select(item => new FlightInfoDto
+            OriginLocationCode = request.OriginLocationCode,
+            DestinationLocationCode = request.DestinationLocationCode,
+            DepartureDate = request.DepartureDate.ToString("yyyy-MM-dd"),
+            ReturnDate = request.ReturnDate.HasValue ? request.ReturnDate.Value.ToString("yyyy-MM-dd") : null,
+            Adults = request.Adults,         
+            CurrencyCode = request.CurrencyCode,
+            Offers = body.Data.Select(item => new FlightInfoDto
             {
-                Id = Guid.NewGuid(),
                 ClientId = item.Id,
-                OriginLocationCode = request.OriginLocationCode,
-                DestinationLocationCode = request.DestinationLocationCode,
-                DepartureDate = request.DepartureDate.ToString("yyyy-MM-dd"),
-                ReturnDate = request.ReturnDate.HasValue ? request.ReturnDate.Value.ToString("yyyy-MM-dd") : null,
-                Adults = request.Adults,
                 NumberOfOutBoundTransfers = item.Itineraries[0].Segments.Length ,
                 NumberOfInBoundTransfers = request.ReturnDate != null ? item.Itineraries[1].Segments.Length : null,
                 OutBoundTransfers = item.Itineraries[0].Segments.Select(x=> new Transfer()
@@ -120,7 +120,7 @@ public class ClientService : IClientService
                     Arrival = x.Arrival
                 }).ToList() : null,
                 TotalPrice = Decimal.Parse(item.Price.Total,CultureInfo.InvariantCulture),
-                CurrencyCode = item.Price.Currency
+
             }).ToList(),
             IsSuccess = true
         };

@@ -9,5 +9,5 @@ public class FetchFlightsOfferRequest
     [Required] public DateTime DepartureDate { get; set; }
     public DateTime? ReturnDate { get; set; }
     [Required] public int Adults { get; set; }
-    public string? CurrencyCode { get; set; }
+    [Required] public string CurrencyCode { get; set; }
 }
