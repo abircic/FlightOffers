@@ -36,7 +36,6 @@ public class TokenHostedService : IHostedService
         }
         catch (Exception e)
         {
-            Console.WriteLine(DateTime.Now);
             await SetTimer(TimeSpan.FromSeconds(5));
         }
     }

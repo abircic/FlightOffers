@@ -14,7 +14,7 @@ namespace FlightOffers.Shared.Services.Implementations;
 
 public class ClientService : IClientService
 {  
-    static HttpClient _httpClient = new();
+    static readonly HttpClient httpClient = new();
     private readonly AppSettingsModel _appSettingsModel;
 
     public ClientService(IOptionsMonitor<AppSettingsModel>appSettingsModel)
@@ -23,7 +23,6 @@ public class ClientService : IClientService
     }
     public async Task<string> FetchAccessToken()
     {
-        var httpClient = new HttpClient();
         var requestUri = $"{_appSettingsModel.FlightOffersBaseUrl}{Endpoints.GetToken}";
         var formData = new Dictionary<string, string>
         {
@@ -46,9 +45,13 @@ public class ClientService : IClientService
     
     public async Task<FetchFlightOfferResponse> FetchFlightsOffer(FetchFlightsOfferRequest request, string token)
     {
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-    
-        HttpResponseMessage response = await _httpClient.GetAsync(CreateRequestUri(request));
+        var req = new HttpRequestMessage()
+        {
+            Headers = { Authorization = new AuthenticationHeaderValue("Bearer", token) },
+            RequestUri = new Uri(CreateRequestUri(request)),
+            Method = HttpMethod.Get
+        };
+        HttpResponseMessage response = await httpClient.SendAsync(req);
         var responseBody = await response.Content.ReadAsStringAsync();
         if (response.IsSuccessStatusCode)
         {
