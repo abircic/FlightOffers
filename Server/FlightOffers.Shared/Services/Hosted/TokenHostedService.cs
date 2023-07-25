@@ -27,24 +27,19 @@ public class TokenHostedService : IHostedService
     private async Task FetchToken(object state)
     {
         try
-        {
+        { 
+            if(_timer != null)
+                await _timer.DisposeAsync();
             var token = await _tokenService.FetchAccessToken(true);
             if (String.IsNullOrEmpty(token))
                 throw new Exception();
-            await SetTimer(TimeSpan.FromMinutes(20));
+            _timer = new Timer(async o => await FetchToken(o), null, TimeSpan.FromMinutes(20), TimeSpan.FromMinutes(20));
             
         }
         catch (Exception e)
         {
-            await SetTimer(TimeSpan.FromSeconds(5));
+            _timer = new Timer(async o => await FetchToken(o), null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
         }
-    }
-
-    private async Task SetTimer(TimeSpan timeSpan)
-    {
-        if(_timer != null)
-            await _timer.DisposeAsync();
-        _timer = new Timer(async o => await FetchToken(o), null, timeSpan, TimeSpan.FromMinutes(20));
     }
     #endregion
 
