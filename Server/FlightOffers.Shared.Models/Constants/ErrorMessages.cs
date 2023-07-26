@@ -8,4 +8,6 @@ public class ErrorMessages
     public const string InvalidDateTime = "Date/Time is in the past";
     public const string InvalidDateChronology = "The date/time of OriginDestination are not in chronological order";
     public const string Forbidden = "Forbidden";
+    public const string InvalidConnectionString = "Invalid connection string";
+    
 }

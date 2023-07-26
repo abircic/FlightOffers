@@ -1,8 +1,10 @@
 ﻿using FlightOffers.Migrations.Migrations;
 using FlightOffers.Migrations.Models;
+using FluentMigrator.Infrastructure;
 using FluentMigrator.Runner;
 using FluentMigrator.Runner.VersionTableInfo;
 using Microsoft.Extensions.DependencyInjection;
+using ErrorMessages = FlightOffers.Shared.Models.Constants.ErrorMessages;
 
 class Program
 {
@@ -10,7 +12,7 @@ class Program
     {
         var connectionString = args.FirstOrDefault(x => x.Contains("connectionString"));
         if (connectionString == null)
-            return;
+            throw new Exception(ErrorMessages.InvalidConnectionString);
         var extractedConnectionString = connectionString.Substring(connectionString.IndexOf("=") + 1);
         var serviceProvider = CreateServices(extractedConnectionString);
         using var scope = serviceProvider.CreateScope();

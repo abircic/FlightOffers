@@ -24,18 +24,17 @@ public class FlightOffersService : IFlightOfferService
         {
                 ValidateRequest(request);
                 
-                var token = await _tokenService.FetchAccessToken(false);
-                if (String.IsNullOrEmpty(token))
-                        throw new ServiceUnavailableException(ErrorMessages.ServiceUnavailable);
-                
                 var filter = await GetOfferFilter(request);
-                
                 if (filter != null)
                 {
                         var offerModels = await GetOfferFromDatabase(filter.Id);
                         return MapOfferModelToResponse(offerModels, request);
                 }
-
+                
+                var token = await _tokenService.FetchAccessToken(false);
+                if (String.IsNullOrEmpty(token))
+                        throw new ServiceUnavailableException(ErrorMessages.ServiceUnavailable);
+                
                 var flightsOffers = await FetchFlightOffersFromClient(request, token);
                 
                 var offers = MapResponseFromClientToOfferModel(flightsOffers.Offers, request);

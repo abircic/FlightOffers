@@ -14,4 +14,8 @@
         <PackageReference Include="Npgsql" Version="8.0.0-preview.4" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\FlightOffers.Shared.Models\FlightOffers.Shared.Models.csproj" />
+    </ItemGroup>
+
 </Project>

@@ -24,12 +24,12 @@ public class Migration_2023_07_20_Create_Offer_Table : Migration
         Execute.Sql(@"
 -- Index for rows with NULL currency_code and return_date
 CREATE UNIQUE INDEX IX_UniqueOfferFields__ReturnDateNull
-ON flight_offers.offer_filter (origin_location_code, destination_location_code, departure_date, currency_code)
+ON flight_offers.offer_filter (origin_location_code, destination_location_code, departure_date, currency_code, adults)
 WHERE return_date IS NULL;
 
 -- Index for rows with NULL currency_code and return_date
 CREATE UNIQUE INDEX IX_UniqueOfferFields__ReturnDateNOTNull
-ON flight_offers.offer_filter (origin_location_code, destination_location_code, departure_date, currency_code,return_date);
+ON flight_offers.offer_filter (origin_location_code, destination_location_code, departure_date, currency_code,return_date, adults);
 
 ");
     }
