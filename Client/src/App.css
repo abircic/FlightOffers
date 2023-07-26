@@ -18,3 +18,15 @@ label {
   margin-bottom: 2px;
   color: #2d3136;
 }
+
+
+.table th,
+.table td {
+  padding: 12px;
+  text-align: left;
+}
+
+.table th {
+  background-color: #0089f2;
+  color: #fff;
+}

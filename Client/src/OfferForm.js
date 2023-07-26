@@ -5,7 +5,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { format } from 'date-fns';
 import './OfferForm.css';
 
-function OfferForm({ onFetchOffers, onFetchError }) {
+function OfferForm({ onFetchOffers, onFetchError, onFormSubmit }) {
   const [originLocationCode, setOriginLocationCode] = useState('');
   const [destinationLocationCode, setDestinationLocationCode] = useState('');
   const [departureDate, setDepartureDate] = useState(null);
@@ -26,6 +26,14 @@ function OfferForm({ onFetchOffers, onFetchError }) {
         const response = await axios.get(apiUrl);
         setLoading(false)
         onFetchOffers(response.data.offers);
+        onFormSubmit({
+          originLocationCode,
+          destinationLocationCode,
+          departureDate: format(new Date(departureDate), 'dd.MM.yyyy.'),
+          returnDate: returnDate ? format(new Date(returnDate), 'dd.MM.yyyy.') : 'N/A',
+          adults,
+          currencyCode
+        });
     } catch (error) {
       setLoading(false)
         if (error.response && error.response.data && error.response.data.message) {
@@ -38,8 +46,7 @@ function OfferForm({ onFetchOffers, onFetchError }) {
   
 
   return (
-    <div className="form-container"> {/* Dodali smo novu klasu form-container */}
-
+    <div className="form-container"> 
     <form onSubmit={handleSubmit}>
       <div className="form-group">
         <label htmlFor="origin">Origin location code:</label>
