@@ -22,7 +22,7 @@ function OfferList({ offers, requestData }) {
             <th>Departure Date</th>
             <th>Return Date</th>
             <th>Total Price</th>
-            <th>Currency Code</th>
+            <th>Currency</th>
             <th>Adults</th>
 
           </tr>
@@ -37,9 +37,9 @@ function OfferList({ offers, requestData }) {
                 <ul>
                   {offer.outBoundTransfers.map((transfer, index) => (
                     <li key={index}>
-                      <strong>Departure:</strong> {transfer.departure.iataCode} at {format(new Date(transfer.departure.at), 'dd.MM.yyyy.hh:mm')}
+                      <strong>Departure:</strong> {transfer.departure.iataCode} at {format(new Date(transfer.departure.at), 'dd.MM.yyyy.HH:mm')}
                       <br />
-                      <strong>Arrival:</strong> {transfer.arrival.iataCode} at {format(new Date(transfer.arrival.at), 'dd.MM.yyyy.hh:mm')}
+                      <strong>Arrival:</strong> {transfer.arrival.iataCode} at {format(new Date(transfer.arrival.at), 'dd.MM.yyyy.HH:mm')}
                     </li>
                   ))}
                 </ul>
@@ -50,9 +50,9 @@ function OfferList({ offers, requestData }) {
                   <ul>
                     {offer.inBoundTransfers.map((transfer, index) => (
                       <li key={index}>
-                        <strong>Departure:</strong> {transfer.departure.iataCode} at {format(new Date(transfer.departure.at), 'dd.MM.yyyy.hh:mm')}
+                        <strong>Departure:</strong> {transfer.departure.iataCode} at {format(new Date(transfer.departure.at), 'dd.MM.yyyy.HH:mm')}
                         <br />
-                        <strong>Arrival:</strong> {transfer.arrival.iataCode} at {format(new Date(transfer.arrival.at), 'dd.MM.yyyy.hh:mm')}
+                        <strong>Arrival:</strong> {transfer.arrival.iataCode} at {format(new Date(transfer.arrival.at), 'dd.MM.yyyy.HH:mm')}
                       </li>
                     ))}
                   </ul>
@@ -62,7 +62,7 @@ function OfferList({ offers, requestData }) {
               </td>
               <td>{requestData.departureDate}</td>
               <td>{requestData.returnDate}</td>
-              <td>{offer.totalPrice}</td>
+              <td>{offer.totalPrice.toFixed(2)}</td>
               <td>{requestData.currencyCode}</td>
               <td>{requestData.adults}</td>
             </tr>

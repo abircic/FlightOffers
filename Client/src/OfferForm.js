@@ -22,7 +22,7 @@ function OfferForm({ onFetchOffers, onFetchError, onFormSubmit }) {
         return;
       }
     try {
-        const apiUrl = `http://localhost:5000/api/public/offer/Fetch?OriginLocationCode=${originLocationCode}&DestinationLocationCode=${destinationLocationCode}&DepartureDate=${format(new Date(departureDate), 'yyyy-MM-dd')}&Adults=${adults}&ReturnDate=${returnDate ? format(new Date(returnDate), 'yyyy-MM-dd') : ''}&CurrencyCode=${currencyCode}`;
+        const apiUrl = `${process.env.REACT_APP_API_BACKEND_URL}/api/public/offer/Fetch?OriginLocationCode=${originLocationCode}&DestinationLocationCode=${destinationLocationCode}&DepartureDate=${format(new Date(departureDate), 'yyyy-MM-dd')}&Adults=${adults}&ReturnDate=${returnDate ? format(new Date(returnDate), 'yyyy-MM-dd') : ''}&CurrencyCode=${currencyCode}`;
         const response = await axios.get(apiUrl);
         setLoading(false)
         onFetchOffers(response.data.offers);
