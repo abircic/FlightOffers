@@ -38,7 +38,7 @@ public class TokenService : ITokenService
 
     private void SetAccessToken(string token)
     {
-        _memoryCache.Set(TokenKey, token, TimeSpan.FromMinutes(20));
+        _memoryCache.Set(TokenKey, token, TimeSpan.FromMinutes(30));
     }
 
     #endregion

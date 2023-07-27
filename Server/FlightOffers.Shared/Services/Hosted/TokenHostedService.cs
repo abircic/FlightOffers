@@ -1,16 +1,19 @@
 using FlightOffers.Shared.Services.Interfaces;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace FlightOffers.Shared.Services.Hosted;
 
 public class TokenHostedService : IHostedService
 {
     private readonly ITokenService _tokenService;
+    private readonly ILogger<TokenHostedService> _logger;
     private Timer _timer;
 
-    public TokenHostedService(ITokenService tokenService)
+    public TokenHostedService(ITokenService tokenService,ILogger<TokenHostedService> logger)
     {
         _tokenService = tokenService;
+        _logger = logger;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -20,6 +23,7 @@ public class TokenHostedService : IHostedService
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        _logger.LogWarning("TokenHostedService has stopped working");
     }
 
     #region Private
